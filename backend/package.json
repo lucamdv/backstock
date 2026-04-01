@@ -1,9 +1,11 @@
 {
-  "name": "api-teste",
+  "name": "backstock-api",
   "version": "1.0.0",
-  "description": "",
+  "description": "API backend do BackStock — integração com SEFAZ para importação de NF-e",
   "main": "index.js",
   "scripts": {
+    "start": "node index.js",
+    "dev": "node --watch index.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
