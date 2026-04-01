@@ -26,13 +26,20 @@ interface InventoryContextType {
   addItem: (item: Omit<InventoryItem, 'id'>) => void;
   removeItem: (id: number) => void;
   retirarItem: (id: number, qty: number) => void;
-  registrarRetirada: (id: number, qty: number) => void;
   confirmarDevolucao: (returns: { itemId: number; qty: number }[]) => void;
   importarItens: (itens: { nome: string; quantidade: number; unidade: string }[], fornecedor: string) => void;
   showToast: (icon: string, message: string, type?: 'success' | 'warning') => void;
   getFilteredItems: () => InventoryItem[];
   getActiveKitchenItems: () => KitchenItem[];
-  getStats: () => { total: number; ok: number; low: number; frozen: number; kitchenTotal: number; returned: number; takenToday: number };
+  getStats: () => {
+    total: number;
+    ok: number;
+    low: number;
+    frozen: number;
+    kitchenTotal: number;
+    returned: number;
+    takenToday: number;
+  };
 }
 
 const InventoryContext = createContext<InventoryContextType | null>(null);
@@ -84,10 +91,6 @@ export function InventoryProvider({ children }: { children: ReactNode }) {
     setCompraHistory(prev => [...prev, { itemId: id, qty, time: new Date() }]);
   }, []);
 
-  const registrarRetirada = useCallback((id: number, qty: number) => {
-    retirarItem(id, qty);
-  }, [retirarItem]);
-
   const confirmarDevolucao = useCallback((returns: { itemId: number; qty: number }[]) => {
     setItems(prev => {
       const updated = [...prev];
@@ -97,37 +100,42 @@ export function InventoryProvider({ children }: { children: ReactNode }) {
       });
       return updated;
     });
-    setKitchenItems(prev => prev.map(k => {
-      const ret = returns.find(r => r.itemId === k.itemId);
-      if (ret && !k.returned) return { ...k, returned: true, returnedQty: ret.qty };
-      return k;
-    }));
+    setKitchenItems(prev =>
+      prev.map(k => {
+        const ret = returns.find(r => r.itemId === k.itemId);
+        if (ret && !k.returned) return { ...k, returned: true, returnedQty: ret.qty };
+        return k;
+      }),
+    );
   }, []);
 
-  const importarItens = useCallback((itens: { nome: string; quantidade: number; unidade: string }[], fornecedor: string) => {
-    setItems(prev => {
-      const updated = [...prev];
-      itens.forEach(itemNota => {
-        const existing = updated.find(i => i.name.toLowerCase() === itemNota.nome.toLowerCase());
-        if (existing) {
-          existing.qty += itemNota.quantidade;
-        } else {
-          updated.push({
-            id: nextId++,
-            name: itemNota.nome,
-            emoji: '📦',
-            cat: 'seco',
-            qty: itemNota.quantidade,
-            unit: itemNota.unidade,
-            min: 5,
-            max: itemNota.quantidade > 100 ? itemNota.quantidade * 1.5 : 100,
-          });
-        }
+  const importarItens = useCallback(
+    (itens: { nome: string; quantidade: number; unidade: string }[], fornecedor: string) => {
+      setItems(prev => {
+        const updated = [...prev];
+        itens.forEach(itemNota => {
+          const existing = updated.find(i => i.name.toLowerCase() === itemNota.nome.toLowerCase());
+          if (existing) {
+            existing.qty += itemNota.quantidade;
+          } else {
+            updated.push({
+              id: nextId++,
+              name: itemNota.nome,
+              emoji: '📦',
+              cat: 'seco',
+              qty: itemNota.quantidade,
+              unit: itemNota.unidade,
+              min: 5,
+              max: itemNota.quantidade > 100 ? itemNota.quantidade * 1.5 : 100,
+            });
+          }
+        });
+        return updated;
       });
-      return updated;
-    });
-    showToast('✅', `Nota de ${fornecedor} importada com sucesso!`);
-  }, [showToast]);
+      showToast('✅', `Nota de ${fornecedor} importada com sucesso!`);
+    },
+    [showToast],
+  );
 
   const getFilteredItems = useCallback(() => {
     const q = searchQuery.toLowerCase();
@@ -142,23 +150,45 @@ export function InventoryProvider({ children }: { children: ReactNode }) {
     return kitchenItems.filter(k => !k.returned);
   }, [kitchenItems]);
 
-  const getStats = useCallback(() => ({
-    total: items.length,
-    ok: items.filter(i => i.qty >= i.min).length,
-    low: items.filter(i => i.qty < i.min).length,
-    frozen: items.filter(i => i.cat === 'congelado').length,
-    kitchenTotal: kitchenItems.filter(k => !k.returned).length,
-    returned: kitchenItems.filter(k => k.returned).length,
-    takenToday: compraHistory.length,
-  }), [items, kitchenItems, compraHistory]);
+  const getStats = useCallback(
+    () => ({
+      total: items.length,
+      ok: items.filter(i => i.qty >= i.min).length,
+      low: items.filter(i => i.qty < i.min).length,
+      frozen: items.filter(i => i.cat === 'congelado').length,
+      kitchenTotal: kitchenItems.filter(k => !k.returned).length,
+      returned: kitchenItems.filter(k => k.returned).length,
+      takenToday: compraHistory.length,
+    }),
+    [items, kitchenItems, compraHistory],
+  );
 
   return (
-    <InventoryContext.Provider value={{
-      items, kitchenItems, compraHistory, viewMode, currentTab, currentPage, searchQuery, toasts,
-      setViewMode, setCurrentTab, setCurrentPage, setSearchQuery,
-      addItem, removeItem, retirarItem, registrarRetirada, confirmarDevolucao, importarItens, showToast,
-      getFilteredItems, getActiveKitchenItems, getStats,
-    }}>
+    <InventoryContext.Provider
+      value={{
+        items,
+        kitchenItems,
+        compraHistory,
+        viewMode,
+        currentTab,
+        currentPage,
+        searchQuery,
+        toasts,
+        setViewMode,
+        setCurrentTab,
+        setCurrentPage,
+        setSearchQuery,
+        addItem,
+        removeItem,
+        retirarItem,
+        confirmarDevolucao,
+        importarItens,
+        showToast,
+        getFilteredItems,
+        getActiveKitchenItems,
+        getStats,
+      }}
+    >
       {children}
     </InventoryContext.Provider>
   );
