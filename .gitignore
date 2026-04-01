@@ -1,6 +1,6 @@
 node_modules/
 .env
-certificados/
+certs/
 
 # Lock files alternativos — o projeto usa npm (package-lock.json)
 bun.lock
