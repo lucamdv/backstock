@@ -2,12 +2,17 @@ import { useState } from 'react';
 import { useInventory } from '@/context/InventoryContext';
 
 export default function CompraPage() {
-  const { items, compraHistory, kitchenItems, registrarRetirada, showToast } = useInventory();
+  const { items, compraHistory, kitchenItems, retirarItem, showToast } = useInventory();
   const [selectedId, setSelectedId] = useState<number>(items[0]?.id || 0);
   const [qty, setQty] = useState('');
 
   const now = new Date();
-  const dateStr = now.toLocaleDateString('pt-BR', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+  const dateStr = now.toLocaleDateString('pt-BR', {
+    weekday: 'long',
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric',
+  });
 
   const handleRetirada = () => {
     const q = parseFloat(qty);
@@ -15,7 +20,7 @@ export default function CompraPage() {
     const item = items.find(i => i.id === selectedId);
     if (!item) return;
     if (q > item.qty) { showToast('⚠️', 'Quantidade indisponível!', 'warning'); return; }
-    registrarRetirada(selectedId, q);
+    retirarItem(selectedId, q);
     setQty('');
     showToast('✅', `${q} ${item.unit} de "${item.name}" retirados!`);
   };
@@ -46,7 +51,10 @@ export default function CompraPage() {
               if (!item) return null;
               const returned = kitchenItems.find(k => k.itemId === c.itemId && k.returned);
               return (
-                <div key={i} className={`flex items-center gap-2 bg-surface-2 border border-border rounded-lg py-2 px-3 text-[13px] transition-all duration-200 ${returned ? 'opacity-50 line-through' : ''}`}>
+                <div
+                  key={i}
+                  className={`flex items-center gap-2 bg-surface-2 border border-border rounded-lg py-2 px-3 text-[13px] transition-all duration-200 ${returned ? 'opacity-50 line-through' : ''}`}
+                >
                   <span>{item.emoji}</span>
                   <span>{item.name}</span>
                   <span className="font-mono text-xs text-primary font-semibold">{c.qty} {item.unit}</span>
@@ -72,7 +80,9 @@ export default function CompraPage() {
               className="w-full h-[42px] bg-surface border border-border rounded-lg px-3.5 text-foreground font-sans text-sm outline-none transition-colors focus:border-primary cursor-pointer appearance-none"
             >
               {items.map(i => (
-                <option key={i.id} value={i.id} className="bg-popover">{i.emoji} {i.name} ({i.qty} {i.unit})</option>
+                <option key={i.id} value={i.id} className="bg-popover">
+                  {i.emoji} {i.name} ({i.qty} {i.unit})
+                </option>
               ))}
             </select>
           </div>
@@ -88,7 +98,10 @@ export default function CompraPage() {
             />
           </div>
         </div>
-        <button onClick={handleRetirada} className="w-full h-[38px] bg-primary text-primary-foreground border-none rounded-lg font-sans text-[13px] font-semibold cursor-pointer transition-all duration-200 hover:bg-primary-deep hover:-translate-y-px">
+        <button
+          onClick={handleRetirada}
+          className="w-full h-[38px] bg-primary text-primary-foreground border-none rounded-lg font-sans text-[13px] font-semibold cursor-pointer transition-all duration-200 hover:bg-primary-deep hover:-translate-y-px"
+        >
           Confirmar Retirada
         </button>
       </div>
