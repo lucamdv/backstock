@@ -1,3 +1,8 @@
 node_modules/
 .env
 certificados/
+
+# Lock files alternativos — o projeto usa npm (package-lock.json)
+bun.lock
+yarn.lock
+pnpm-lock.yaml
