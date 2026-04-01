@@ -1,24 +1,5 @@
 import { InventoryItem, CATEGORY_LABELS } from '@/types/inventory';
-
-function getQtyColor(item: InventoryItem) {
-  const pct = item.qty / item.max;
-  if (item.qty < item.min) return 'text-destructive';
-  if (pct < 0.4) return 'text-primary';
-  return 'text-success';
-}
-
-function getQtyBarColor(item: InventoryItem) {
-  const pct = item.qty / item.max;
-  if (item.qty < item.min) return 'bg-destructive';
-  if (pct < 0.4) return 'bg-primary';
-  return 'bg-success';
-}
-
-function StatusBadge({ item }: { item: InventoryItem }) {
-  if (item.qty < item.min) return <span className="inline-flex items-center justify-center px-2 py-0.5 rounded-full text-[11px] font-bold font-mono bg-destructive/10 text-destructive">⚠ Baixo</span>;
-  if (item.qty / item.max < 0.4) return <span className="inline-flex items-center justify-center px-2 py-0.5 rounded-full text-[11px] font-bold font-mono bg-primary-glow text-primary border border-[hsl(var(--border-bright))]">Médio</span>;
-  return <span className="inline-flex items-center justify-center px-2 py-0.5 rounded-full text-[11px] font-bold font-mono bg-success/10 text-success">OK</span>;
-}
+import { getQtyColor, getQtyBarColor, StatusBadge } from './itemUtils';
 
 interface ItemCardProps {
   item: InventoryItem;
@@ -48,14 +29,23 @@ export default function ItemCard({ item, index, onRetirar, onRemove }: ItemCardP
       </div>
 
       <div className="h-1 bg-surface-2 rounded overflow-hidden">
-        <div className={`h-full rounded transition-all duration-500 ease-[cubic-bezier(.4,0,.2,1)] ${getQtyBarColor(item)}`} style={{ width: `${pct}%` }} />
+        <div
+          className={`h-full rounded transition-all duration-500 ease-[cubic-bezier(.4,0,.2,1)] ${getQtyBarColor(item)}`}
+          style={{ width: `${pct}%` }}
+        />
       </div>
 
       <div className="flex gap-1.5 mt-3.5">
-        <button onClick={() => onRetirar(item.id)} className="flex-1 h-8 rounded-lg border border-border bg-surface-2 text-muted-foreground text-xs font-semibold cursor-pointer transition-all duration-200 font-sans flex items-center justify-center gap-1 hover:border-primary hover:text-primary hover:bg-primary-glow">
+        <button
+          onClick={() => onRetirar(item.id)}
+          className="flex-1 h-8 rounded-lg border border-border bg-surface-2 text-muted-foreground text-xs font-semibold cursor-pointer transition-all duration-200 font-sans flex items-center justify-center gap-1 hover:border-primary hover:text-primary hover:bg-primary-glow"
+        >
           🛒 Retirar
         </button>
-        <button onClick={() => onRemove(item.id)} className="flex-1 h-8 rounded-lg border border-border bg-surface-2 text-muted-foreground text-xs font-semibold cursor-pointer transition-all duration-200 font-sans flex items-center justify-center gap-1 hover:border-destructive hover:text-destructive hover:bg-destructive/10">
+        <button
+          onClick={() => onRemove(item.id)}
+          className="flex-1 h-8 rounded-lg border border-border bg-surface-2 text-muted-foreground text-xs font-semibold cursor-pointer transition-all duration-200 font-sans flex items-center justify-center gap-1 hover:border-destructive hover:text-destructive hover:bg-destructive/10"
+        >
           🗑
         </button>
       </div>
